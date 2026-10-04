@@ -21,16 +21,16 @@
         numeroPizze: 4,
         pesoPanetto: 270,
         idratazione: 65,
-        salePerKg: 25, // Grammi di sale per kg di farina (range consigliato 22-28g)
+        salePerKg: 25, // Grammi di sale per kg di farina (suggerito 22-28g)
         tipoFarina: '00', // Opzioni: '00', '0', '1', 'integrale'
         usaLievitoSecco: false,
         usaFrigo: true,
         oreFrigo: 12,
         tempFrigo: 4,
         oreAmbiente: 6,
-        tempAmbiente: 22,
+        tempAmbiente: 22, // Temperatura stanza in °C (modificabile dall'utente)
 
-        // Fattore correttivo per la farina (farine integrali e tipo 1 fermentano più velocemente)
+        // Fattore di fermentazione in base alla farina
         get fattoreFarina() {
             switch(this.tipoFarina) {
                 case '1': return 0.92;
@@ -57,6 +57,7 @@
             return Math.round((this.farina * (this.salePerKg / 1000)) * 10) / 10;
         },
 
+        // Calcolo cinetico della fermentazione basato sulla temperatura ambiente reale
         get tempoTotaleEquivalente() {
             let frigoEq = this.usaFrigo ? (this.oreFrigo * 0.1) : 0;
             let fattoreTempAmb = Math.pow(2, (this.tempAmbiente - 22) / 10);
@@ -81,7 +82,7 @@
             <p class="text-xs text-slate-400 font-medium">Calcolatore di Precisione per l'Impasto</p>
         </div>
 
-        <!-- BOX RISULTATI (Grafica Evidenziata) -->
+        <!-- BOX RISULTATI (Evidenziato) -->
         <div class="bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl p-5 shadow-xl text-slate-950 mb-6 border border-amber-300/40">
             <div class="flex justify-between items-center mb-3 border-b border-amber-700/20 pb-2">
                 <h2 class="font-extrabold text-lg uppercase tracking-wider">Formula Calcolata</h2>
@@ -108,7 +109,7 @@
             </div>
         </div>
 
-        <!-- PANNELLO CONTROLLI -->
+        <!-- CONTROLLI DI INPUT -->
         <div class="bg-slate-800/80 rounded-2xl p-5 shadow-lg border border-slate-700/50 space-y-5">
             
             <!-- 1. Quantità e Peso Panetti -->
@@ -195,22 +196,37 @@
                 </template>
             </div>
 
-            <!-- 7. Lievitazione a Temperatura Ambiente -->
-            <div class="pt-2 border-t border-slate-700/50 space-y-3">
+            <!-- 7. SETTAGGIO TEMPERATURA AMBIENTE E ORE -->
+            <div class="pt-2 border-t border-slate-700/50 space-y-4">
+                
+                <!-- Ore Temperatura Ambiente -->
                 <div>
                     <label class="flex justify-between text-sm font-semibold mb-1">
                         <span>Ore a Temperatura Ambiente:</span>
-                        <span class="text-amber-400 font-bold" x-text="oreAmbiente + ' h'"></span>
+                        <span class="text-amber-400 font-bold text-base" x-text="oreAmbiente + ' h'"></span>
                     </label>
                     <input type="range" min="1" max="24" x-model="oreAmbiente" class="w-full accent-amber-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer">
                 </div>
-                <div>
-                    <label class="flex justify-between text-sm font-semibold mb-1">
-                        <span>Temperatura Ambiente Stanza:</span>
-                        <span class="text-amber-400 font-bold" x-text="tempAmbiente + ' °C'"></span>
+
+                <!-- Temperatura Stanza (Slider + Scelte Rapide) -->
+                <div class="bg-amber-500/5 p-3 rounded-xl border border-amber-500/20">
+                    <label class="flex justify-between text-sm font-semibold mb-2">
+                        <span>🌡️ Temperatura Ambiente Stanza:</span>
+                        <span class="text-amber-400 font-bold text-base" x-text="tempAmbiente + ' °C'"></span>
                     </label>
-                    <input type="range" min="14" max="32" x-model="tempAmbiente" class="w-full accent-amber-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer">
+                    
+                    <!-- Slider Temperatura -->
+                    <input type="range" min="12" max="35" x-model="tempAmbiente" class="w-full accent-amber-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer mb-3">
+                    
+                    <!-- Pre-set rapidi di temperatura -->
+                    <div class="grid grid-cols-4 gap-1.5 text-center">
+                        <button @click="tempAmbiente = 18" :class="tempAmbiente == 18 ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-slate-700 text-slate-300'" class="py-1 rounded text-[11px] transition-all">18°C Inverno</button>
+                        <button @click="tempAmbiente = 22" :class="tempAmbiente == 22 ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-slate-700 text-slate-300'" class="py-1 rounded text-[11px] transition-all">22°C Mite</button>
+                        <button @click="tempAmbiente = 26" :class="tempAmbiente == 26 ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-slate-700 text-slate-300'" class="py-1 rounded text-[11px] transition-all">26°C Caldo</button>
+                        <button @click="tempAmbiente = 28" :class="tempAmbiente == 28 ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-slate-700 text-slate-300'" class="py-1 rounded text-[11px] transition-all">28°C Estate</button>
+                    </div>
                 </div>
+
             </div>
 
         </div>
